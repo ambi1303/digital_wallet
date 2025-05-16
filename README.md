@@ -60,12 +60,15 @@ source venv/bin/activate  # Linux/Mac
 venv\Scripts\activate     # Windows
 
 3. Install dependencies:
+```bash
 pip install -r requirements.txt
 
-4. Initialize the Database 
+4. Initilize the Database:
+```bash
 python create_db.py
 
-5. Run the FastApi Server 
+5. Run the FastApi Server:
+```bash
 uvicorn app.main:app --reload
 
 6. Access API docs at http://localhost:8000/docs
