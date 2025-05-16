@@ -55,21 +55,22 @@ A secure digital wallet backend built with FastAPI, featuring cash management, m
    git clone https://github.com/ambi1303/digital_wallet.git
    cd digital_wallet
 2. Create and activate a virtual environment:
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate     # Windows
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Linux/Mac
+   venv\Scripts\activate     # Windows
 
 3. Install dependencies:
-```bash
-pip install -r requirements.txt
+   ```bash
+   pip install -r requirements.txt
 
 4. Initilize the Database:
-```bash
-python create_db.py
+   ```bash
+   python create_db.py
 
 5. Run the FastApi Server:
-```bash
-uvicorn app.main:app --reload
+   ```bash
+   uvicorn app.main:app --reload
 
 6. Access API docs at http://localhost:8000/docs
 
