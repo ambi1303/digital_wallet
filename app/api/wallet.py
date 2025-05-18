@@ -1,54 +1,140 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-
-from app.schemas.transaction import TransactionCreate, TransactionOut
-from app.crud import transaction as crud_txn
-from app.crud import user as crud_user
-from app.database import SessionLocal
-from app.middlewares.auth_middleware import get_current_user
-from app.models import transaction as txn_model
+from app.database import get_db
+from app.schemas.transaction import TransactionCreate, TransactionResponse, TransactionFilter
+from app.services.fraud_detection import FraudDetectionService
+from app.models.transaction import Transaction, TransactionStatus
+from app.models.wallet import Wallet
+from app.utils.auth import get_current_user
+from app.models.user import User
+from sqlalchemy.exc import SQLAlchemyError
+from fastapi.responses import JSONResponse
 
 router = APIRouter()
 
-
-def get_db():
-    db = SessionLocal()
+@router.post("/transactions", response_model=TransactionResponse, status_code=status.HTTP_201_CREATED)
+async def create_transaction(
+    transaction: TransactionCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Create a new transaction.
+    
+    - **amount**: Transaction amount (must be positive)
+    - **currency**: Currency code (e.g., USD)
+    - **transaction_type**: Type of transaction (DEPOSIT/WITHDRAWAL/TRANSFER)
+    - **description**: Optional transaction description
+    - **recipient_id**: Required for transfers
+    
+    Returns the created transaction with status and fraud detection results.
+    """
     try:
-        yield db
-    finally:
-        db.close()
+        # Get user's wallet
+        wallet = db.query(Wallet).filter(Wallet.user_id == current_user.id).first()
+        if not wallet:
+            raise HTTPException(status_code=404, detail="Wallet not found")
 
+        # Validate transaction
+        if transaction.transaction_type == "TRANSFER" and not transaction.recipient_id:
+            raise HTTPException(status_code=400, detail="Recipient ID required for transfers")
 
-@router.post("/", response_model=TransactionOut)
-def perform_transaction(
-    txn: TransactionCreate,
+        # Check fraud detection
+        fraud_service = FraudDetectionService(db)
+        is_suspicious, reason = fraud_service.check_transaction(
+            current_user.id,
+            transaction.amount,
+            transaction.transaction_type
+        )
+
+        # Create transaction
+        db_transaction = Transaction(
+            user_id=current_user.id,
+            wallet_id=wallet.id,
+            transaction_type=transaction.transaction_type,
+            amount=transaction.amount,
+            currency=transaction.currency,
+            description=transaction.description,
+            recipient_id=transaction.recipient_id,
+            is_flagged=is_suspicious,
+            flag_reason=reason if is_suspicious else None
+        )
+
+        # Process transaction
+        if transaction.transaction_type == "DEPOSIT":
+            wallet.balance += transaction.amount
+        elif transaction.transaction_type == "WITHDRAWAL":
+            if wallet.balance < transaction.amount:
+                raise HTTPException(status_code=400, detail="Insufficient funds")
+            wallet.balance -= transaction.amount
+        elif transaction.transaction_type == "TRANSFER":
+            if wallet.balance < transaction.amount:
+                raise HTTPException(status_code=400, detail="Insufficient funds")
+            recipient_wallet = db.query(Wallet).filter(Wallet.user_id == transaction.recipient_id).first()
+            if not recipient_wallet:
+                raise HTTPException(status_code=404, detail="Recipient wallet not found")
+            wallet.balance -= transaction.amount
+            recipient_wallet.balance += transaction.amount
+
+        db_transaction.status = TransactionStatus.COMPLETED
+        db.add(db_transaction)
+        db.commit()
+        db.refresh(db_transaction)
+
+        return db_transaction
+
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Database error occurred")
+
+@router.get("/transactions", response_model=List[TransactionResponse])
+async def get_transactions(
+    filters: TransactionFilter = Depends(),
     db: Session = Depends(get_db),
-    user=Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
-    return crud_txn.create_transaction(db, user, txn)
+    """
+    Get user's transactions with optional filtering.
+    
+    - **start_date**: Filter transactions after this date
+    - **end_date**: Filter transactions before this date
+    - **transaction_type**: Filter by transaction type
+    - **min_amount**: Filter transactions above this amount
+    - **max_amount**: Filter transactions below this amount
+    - **is_flagged**: Filter flagged transactions
+    """
+    query = db.query(Transaction).filter(Transaction.user_id == current_user.id)
 
+    if filters.start_date:
+        query = query.filter(Transaction.created_at >= filters.start_date)
+    if filters.end_date:
+        query = query.filter(Transaction.created_at <= filters.end_date)
+    if filters.transaction_type:
+        query = query.filter(Transaction.transaction_type == filters.transaction_type)
+    if filters.min_amount:
+        query = query.filter(Transaction.amount >= filters.min_amount)
+    if filters.max_amount:
+        query = query.filter(Transaction.amount <= filters.max_amount)
+    if filters.is_flagged is not None:
+        query = query.filter(Transaction.is_flagged == filters.is_flagged)
 
-@router.get("/history", response_model=List[TransactionOut])
-def get_transaction_history(
-    db: Session = Depends(get_db),
-    user=Depends(get_current_user)
-):
-    transactions = db.query(txn_model.Transaction).filter(
-        (
-            (txn_model.Transaction.sender_id == user.id) |
-            (txn_model.Transaction.receiver_id == user.id)
-        ) &
-        (txn_model.Transaction.is_deleted == False)
-    ).order_by(txn_model.Transaction.timestamp.desc()).all()
-
-    return transactions
-
+    return query.order_by(Transaction.created_at.desc()).all()
 
 @router.get("/balance")
-def get_balance(
+async def get_balance(
     db: Session = Depends(get_db),
-    user=Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
-    balances = crud_user.get_user_balances(db, user.id)
-    return {"balances": balances}
+    """
+    Get user's current wallet balance.
+    """
+    wallet = db.query(Wallet).filter(Wallet.user_id == current_user.id).first()
+    if not wallet:
+        raise HTTPException(status_code=404, detail="Wallet not found")
+    
+    return {
+        "balance": wallet.balance,
+        "currency": wallet.currency.value,
+        "last_updated": wallet.updated_at
+    }
