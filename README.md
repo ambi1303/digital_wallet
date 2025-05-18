@@ -1,76 +1,126 @@
-# Digital Wallet System with Fraud Detection
+# Digital Wallet System
 
-A secure digital wallet backend built with FastAPI, featuring cash management, multi-currency support, and fraud detection.
+A secure and feature-rich digital wallet system with cash management and fraud detection capabilities.
 
 ## Features
 
-### Core Features
-- **User Authentication:** Registration and login with bcrypt hashed passwords and JWT token-based authentication.
-- **Wallet Operations:** Deposit, withdraw, and transfer virtual cash between users.
-- **Multi-Currency Support:** Transactions and balances support multiple currencies (USD, INR, EUR, etc.).
-- **Transaction History:** Maintains detailed history of all wallet transactions per user.
-- **Transaction Validation:** Prevents overdrafts, negative amounts, invalid transfers.
-- **Fraud Detection:** Rule-based checks for rapid transfers and large withdrawals with flagged transactions.
-- **Admin APIs:** View flagged transactions, aggregate balances, and top users by transaction volume.
-
-### Bonus Features
-- **Scheduled Fraud Scanning:** Daily automated fraud scans using APScheduler.
-- **Soft Delete:** Users and transactions are soft deleted (marked inactive, not physically removed).
-- **Email Alerts:** Mock email notifications sent to users upon suspicious transactions.
-- **Swagger Documentation:** Fully documented RESTful API available at `/docs`.
+- User Authentication & Session Management
+- Wallet Operations (Deposit, Withdraw, Transfer)
+- Multi-currency Support
+- Transaction Processing & Validation
+- Fraud Detection System
+- Admin & Reporting APIs
+- Email Alerts for Suspicious Activities
+- Scheduled Fraud Scans
 
 ## Tech Stack
-- **Backend Framework:** FastAPI
-- **Database ORM:** SQLAlchemy
-- **Authentication:** JWT, bcrypt
-- **Scheduler:** APScheduler for periodic fraud detection
-- **Database:** SQLite (default), easily replaceable with PostgreSQL/MySQL
-- **Python Version:** 3.12+
 
-## API Overview
+- FastAPI (Python web framework)
+- SQLAlchemy (ORM)
+- PostgreSQL (Database)
+- JWT (Authentication)
+- APScheduler (Task Scheduling)
+- Pydantic (Data Validation)
 
-### Authentication
-- `POST /auth/register` - Register new user
-- `POST /auth/login` - Login and receive JWT token
+## Prerequisites
 
-### Wallet
-- `POST /wallet/` - Perform deposit, withdraw, or transfer
-- `GET /wallet/history` - Get transaction history (filtered for user)
-- `GET /wallet/balance` - Get current balance(s) per currency
+- Python 3.8+
+- PostgreSQL
+- SMTP Server (for email alerts)
 
-### Admin
-- `GET /admin/flagged-transactions` - View flagged suspicious transactions
-- `GET /admin/total-balances` - Aggregate user balances across currencies
-- `GET /admin/top-users` - List top users by transaction volume
-
-### Fraud Detection
-- Scheduled daily fraud scan flags suspicious activity automatically
-- Mock email alerts on suspicious transactions
-
-## Setup & Installation
+## Setup
 
 1. Clone the repository:
+```bash
+git clone <repository-url>
+cd digital_wallet
+```
 
-   ```bash
-   git clone https://github.com/ambi1303/digital_wallet.git
-   cd digital_wallet
-2. Create and activate a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # Linux/Mac
-   venv\Scripts\activate     # Windows
+2. Create and activate virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+```
 
 3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
+```bash
+pip install -r requirements.txt
+```
 
-4. Initilize the Database:
-   ```bash
-   python create_db.py
+4. Create .env file:
+```bash
+cp .env.example .env
+```
+Edit .env with your configuration
 
-5. Run the FastApi Server:
-   ```bash
-   uvicorn app.main:app --reload
+5. Initialize database:
+```bash
+alembic upgrade head
+```
 
-6. Access API docs at http://localhost:8000/docs
+6. Run the application:
+```bash
+uvicorn app.main:app --reload
+```
+
+## API Documentation
+
+Once the application is running, visit:
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+
+## Project Structure
+
+```
+digital_wallet/
+├── alembic/              # Database migrations
+├── app/
+│   ├── api/             # API endpoints
+│   ├── models/          # Database models
+│   ├── schemas/         # Pydantic models
+│   ├── services/        # Business logic
+│   ├── tasks/           # Scheduled tasks
+│   ├── utils/           # Utilities
+│   ├── config.py        # Configuration
+│   ├── database.py      # Database setup
+│   └── main.py          # Application entry
+├── tests/               # Test files
+├── .env                 # Environment variables
+├── requirements.txt     # Dependencies
+└── README.md           # This file
+```
+
+## Security Features
+
+- Password hashing with bcrypt
+- JWT token authentication
+- Rate limiting
+- Transaction validation
+- Fraud detection rules
+- Email alerts for suspicious activities
+
+## Development
+
+1. Run tests:
+```bash
+pytest
+```
+
+2. Run linting:
+```bash
+flake8
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
 
