@@ -1,5 +1,5 @@
 import api from './api';
-import { Wallet, Transaction, TransactionCreate } from '../types';
+import type { Wallet, Transaction, TransactionCreate } from '../types';
 
 class WalletService {
   async getWallet(): Promise<Wallet> {

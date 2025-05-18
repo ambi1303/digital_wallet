@@ -1,3 +1,13 @@
+// src/types/index.ts
+export * from './user';
+export * from './wallet';
+export * from './transaction';
+export * from './auth';
+export * from './login';
+export * from './register';
+export * from './transactionCreate';
+
+
 export interface User {
   id: number;
   email: string;

@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import walletService from '../services/wallet.service';
-import { Wallet, Transaction } from '../types';
+// src/pages/Dashboard.tsx
+
+import React, { useEffect, useState } from 'react'
+import { useAuth } from '../contexts/AuthContext'      // ← runtime import
+import walletService from '../services/wallet.service'
+import type { Wallet, Transaction } from '../types'     // ← type-only import
+
 import {
   Container,
   Grid,
@@ -16,43 +19,48 @@ import {
   TableRow,
   Button,
   CircularProgress,
-} from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+} from '@mui/material'
+import { useNavigate } from 'react-router-dom'
 
 const Dashboard: React.FC = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [wallet, setWallet] = useState<Wallet | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { user } = useAuth()
+  const navigate = useNavigate()
+
+  const [wallet, setWallet] = useState<Wallet | null>(null)
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [walletData, transactionsData] = await Promise.all([
           walletService.getWallet(),
-          walletService.getTransactionHistory(),
-        ]);
-        setWallet(walletData);
-        setTransactions(transactionsData);
+          walletService.getTransactions(),    // ← renamed to match service
+        ])
+        setWallet(walletData)
+        setTransactions(transactionsData)
       } catch (err) {
-        setError('Failed to load wallet data');
-        console.error(err);
+        console.error(err)
+        setError('Failed to load wallet data')
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
-
-    fetchData();
-  }, []);
+    }
+    fetchData()
+  }, [])
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+      >
         <CircularProgress />
       </Box>
-    );
+    )
   }
 
   if (error) {
@@ -62,7 +70,7 @@ const Dashboard: React.FC = () => {
           {error}
         </Typography>
       </Container>
-    );
+    )
   }
 
   return (
@@ -87,25 +95,13 @@ const Dashboard: React.FC = () => {
               Quick Actions
             </Typography>
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => navigate('/deposit')}
-              >
+              <Button variant="contained" onClick={() => navigate('/deposit')}>
                 Deposit
               </Button>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => navigate('/withdraw')}
-              >
+              <Button variant="contained" onClick={() => navigate('/withdraw')}>
                 Withdraw
               </Button>
-              <Button
-                variant="contained"
-                color="info"
-                onClick={() => navigate('/transfer')}
-              >
+              <Button variant="contained" onClick={() => navigate('/transfer')}>
                 Transfer
               </Button>
             </Box>
@@ -129,16 +125,16 @@ const Dashboard: React.FC = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {transactions.map((transaction) => (
-                    <TableRow key={transaction.id}>
+                  {transactions.map((tx) => (
+                    <TableRow key={tx.id}>
                       <TableCell>
-                        {new Date(transaction.created_at).toLocaleDateString()}
+                        {new Date(tx.created_at).toLocaleDateString()}
                       </TableCell>
-                      <TableCell>{transaction.transaction_type}</TableCell>
+                      <TableCell>{tx.transaction_type}</TableCell>
                       <TableCell>
-                        {transaction.amount} {transaction.currency}
+                        {tx.amount.toFixed(2)} {tx.currency}
                       </TableCell>
-                      <TableCell>{transaction.status}</TableCell>
+                      <TableCell>{tx.status}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -148,7 +144,7 @@ const Dashboard: React.FC = () => {
         </Grid>
       </Grid>
     </Container>
-  );
-};
+  )
+}
 
-export default Dashboard; 
+export default Dashboard

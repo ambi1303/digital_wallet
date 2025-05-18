@@ -7,6 +7,18 @@ app = FastAPI(
     description="Backend system for wallet operations and fraud detection",
     version="1.0.0"
 )
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # or ["*"] to allow all (not recommended for production)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Start the scheduler after app creation
 start_scheduler(app)
