@@ -1,115 +1,108 @@
-# Digital Wallet System
+# Digital Wallet Application
 
-A secure and feature-rich digital wallet system with cash management and fraud detection capabilities.
-
-## Features
-
-- User Authentication & Session Management
-- Wallet Operations (Deposit, Withdraw, Transfer)
-- Multi-currency Support
-- Transaction Processing & Validation
-- Fraud Detection System
-- Admin & Reporting APIs
-- Email Alerts for Suspicious Activities
-- Scheduled Fraud Scans
-
-## Tech Stack
-
-- FastAPI (Python web framework)
-- SQLAlchemy (ORM)
-- PostgreSQL (Database)
-- JWT (Authentication)
-- APScheduler (Task Scheduling)
-- Pydantic (Data Validation)
-
-## Prerequisites
-
-- Python 3.8+
-- PostgreSQL
-- SMTP Server (for email alerts)
-
-## Setup
-
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd digital_wallet
-```
-
-2. Create and activate virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate     # Windows
-```
-
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-4. Create .env file:
-```bash
-cp .env.example .env
-```
-Edit .env with your configuration
-
-5. Initialize database:
-```bash
-alembic upgrade head
-```
-
-6. Run the application:
-```bash
-uvicorn app.main:app --reload
-```
-
-## API Documentation
-
-Once the application is running, visit:
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+A full-stack digital wallet application built with Angular (frontend) and FastAPI (backend).
 
 ## Project Structure
 
 ```
 digital_wallet/
-├── alembic/              # Database migrations
-├── app/
-│   ├── api/             # API endpoints
-│   ├── models/          # Database models
-│   ├── schemas/         # Pydantic models
-│   ├── services/        # Business logic
-│   ├── tasks/           # Scheduled tasks
-│   ├── utils/           # Utilities
-│   ├── config.py        # Configuration
-│   ├── database.py      # Database setup
-│   └── main.py          # Application entry
-├── tests/               # Test files
-├── .env                 # Environment variables
-├── requirements.txt     # Dependencies
-└── README.md           # This file
+├── frontend/           # Angular application
+└── backend/           # FastAPI application
 ```
 
-## Security Features
+## Backend (FastAPI)
 
-- Password hashing with bcrypt
-- JWT token authentication
-- Rate limiting
-- Transaction validation
-- Fraud detection rules
-- Email alerts for suspicious activities
+The backend is built with FastAPI and provides a robust API for the digital wallet application.
+
+### Features
+- User authentication and authorization
+- Wallet management
+- Transaction processing
+- Admin dashboard
+- Fraud detection
+- Automated reporting
+
+### Setup
+1. Create a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+2. Install dependencies:
+```bash
+cd backend
+pip install -r requirements.txt
+```
+
+3. Set up environment variables:
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+```
+
+4. Initialize the database:
+```bash
+python create_db.py
+```
+
+5. Run the application:
+```bash
+uvicorn app.main:app --reload
+```
+
+The API will be available at `http://localhost:8000`
+
+## Frontend (Angular)
+
+The frontend is built with Angular and provides a modern, responsive user interface.
+
+### Features
+- User authentication
+- Wallet dashboard
+- Transaction management
+- Real-time balance updates
+- Admin interface
+- Responsive design
+
+### Setup
+1. Install dependencies:
+```bash
+cd frontend
+npm install
+```
+
+2. Run the development server:
+```bash
+ng serve
+```
+
+The application will be available at `http://localhost:4200`
 
 ## Development
 
-1. Run tests:
-```bash
-pytest
-```
+### Backend Development
+- API documentation is available at `/docs` when running the backend
+- Run tests: `pytest`
+- Database migrations: `alembic upgrade head`
 
-2. Run linting:
+### Frontend Development
+- Run tests: `ng test`
+- Build for production: `ng build --prod`
+- Lint code: `ng lint`
+
+## Docker Support
+
+Both frontend and backend can be run using Docker:
+
 ```bash
-flake8
+# Build and run backend
+docker build -t digital-wallet-backend ./backend
+docker run -p 8000:8000 digital-wallet-backend
+
+# Build and run frontend
+docker build -t digital-wallet-frontend ./frontend
+docker run -p 4200:80 digital-wallet-frontend
 ```
 
 ## Contributing
