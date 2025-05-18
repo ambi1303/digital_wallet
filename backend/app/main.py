@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.api import auth, wallet, admin
 from app.utils.scheduler import start_scheduler
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="Digital Wallet API",
@@ -14,7 +15,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # or ["*"] to allow all (not recommended for production)
+    allow_origins=["http://localhost:5173"],  # Add your frontend URL(s)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

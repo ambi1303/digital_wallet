@@ -9,6 +9,12 @@ class TransactionType(str, enum.Enum):
     WITHDRAWAL = "WITHDRAWAL"
     TRANSFER = "TRANSFER"
 
+class TransactionStatus(enum.Enum):
+    PENDING = "PENDING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+    FLAGGED = "FLAGGED"
+
 class User(Base):
     __tablename__ = "users"
 

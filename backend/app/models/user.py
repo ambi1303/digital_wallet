@@ -15,10 +15,26 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     last_login = Column(DateTime, nullable=True)
+    is_deleted = Column(Boolean, default=False)
     
     # Relationships
     wallet = relationship("Wallet", back_populates="user", uselist=False)
-    transactions = relationship("Transaction", back_populates="user")
+
+    sent_transactions = relationship(
+        "Transaction",
+        back_populates="user",
+        foreign_keys="Transaction.user_id"
+    )
+
+    received_transactions = relationship(
+        "Transaction",
+        back_populates="recipient",
+        foreign_keys="Transaction.recipient_id"
+    )
+
+    def __repr__(self):
+        return f"<User {self.username}>"
+
     
     def __repr__(self):
         return f"<User {self.username}>" 
