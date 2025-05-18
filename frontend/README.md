@@ -1,59 +1,89 @@
-# Frontend
+# Digital Wallet Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.12.
+A modern React frontend for the Digital Wallet application, built with TypeScript, Material-UI, and Vite.
 
-## Development server
+## Features
 
-To start a local development server, run:
+- User authentication (login/register)
+- Wallet management
+- Transaction operations (deposit, withdraw, transfer)
+- Transaction history
+- Responsive design
+- Real-time balance updates
+- JWT authentication
+- Protected routes
 
+## Prerequisites
+
+- Node.js (v14 or higher)
+- npm or yarn
+- Backend API running (see backend README)
+
+## Setup
+
+1. Install dependencies:
 ```bash
-ng serve
+npm install
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+2. Create a `.env` file in the root directory:
+```env
+VITE_API_URL=http://localhost:8000/api/v1
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
+3. Start the development server:
 ```bash
-ng generate --help
+npm run dev
 ```
 
-## Building
+The application will be available at `http://localhost:5173`.
 
-To build the project run:
+## Building for Production
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+To create a production build:
 
 ```bash
-ng test
+npm run build
 ```
 
-## Running end-to-end tests
+The build artifacts will be stored in the `dist/` directory.
 
-For end-to-end (e2e) testing, run:
+## Project Structure
 
-```bash
-ng e2e
+```
+src/
+  ├── components/     # Reusable UI components
+  ├── contexts/       # React contexts (auth, etc.)
+  ├── hooks/         # Custom React hooks
+  ├── pages/         # Page components
+  ├── services/      # API services
+  ├── types/         # TypeScript interfaces
+  ├── utils/         # Utility functions
+  └── assets/        # Static assets
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Available Scripts
 
-## Additional Resources
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+- `npm run format` - Format code with Prettier
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## API Integration
+
+The frontend communicates with the backend API endpoints:
+
+- `/auth/login` - User login
+- `/auth/register` - User registration
+- `/wallet` - Wallet operations
+- `/transactions` - Transaction operations
+- `/users/me` - Current user info
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request

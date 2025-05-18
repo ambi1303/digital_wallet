@@ -1,34 +1,30 @@
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from datetime import datetime
-from pydantic import BaseModel, confloat
 from app.core.models import TransactionType
 
-class TransactionBase(BaseModel):
-    amount: confloat(gt=0)
-    currency: str
-    transaction_type: TransactionType
-    description: Optional[str] = None
-    recipient_id: Optional[int] = None
+class TransactionCreate(BaseModel):
+    type: str  # deposit, withdraw, transfer
+    amount: float
+    receiver_username: Optional[str] = None
+    currency: Optional[str] = "USD"
 
-class TransactionCreate(TransactionBase):
-    user_id: int
-    wallet_id: int
-
-class TransactionUpdate(BaseModel):
-    is_flagged: bool
-
-class TransactionInDBBase(TransactionBase):
+class TransactionOut(BaseModel):
     id: int
-    user_id: int
-    wallet_id: int
-    is_flagged: bool
-    created_at: datetime
+    type: str
+    amount: float
+    currency: str
+    timestamp: datetime
+    sender_id: Optional[int]
+    receiver_id: Optional[int]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
-class Transaction(TransactionInDBBase):
-    pass
+class TransactionFilter(BaseModel):
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    transaction_type: Optional[TransactionType] = None
+    min_amount: Optional[float] = None
+    max_amount: Optional[float] = None
+    is_flagged: Optional[bool] = None
 
-class TransactionInDB(TransactionInDBBase):
-    pass 
